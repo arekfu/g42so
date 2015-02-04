@@ -1,0 +1,4 @@
+#!/usr/bin/env python
+import detect_compiler
+
+print detect_compiler.compiler_and_flags()
