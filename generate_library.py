@@ -8,14 +8,13 @@ import os.path
 import sys
 import tempfile
 
-def get_t4g4_frontend_functions(d_wh, par_wh):
+def get_t4g4_frontend_functions(d_wh):
     current_module = sys.modules[__name__]
     module_dir = os.path.dirname(inspect.getfile(current_module))
     template_fname = os.path.join(module_dir, 'frontend.cc.in')
     with open(template_fname) as template_f: template = template_f.read()
 
     include_directives = ['#include "' + d_wh[1] + '"']
-    include_directives += ['#include "' + p[1] + '"' for p in par_wh]
     includes = '\n'.join(include_directives)
 
     varname = 'a_detector'
@@ -23,17 +22,12 @@ def get_t4g4_frontend_functions(d_wh, par_wh):
     detector_class_name=d_wh[0]
     detector_params=''
 
-    # instantiation of parallel worlds. no parameters for the moment
-    parallel_worlds_list = [ varname + '->RegisterParallelWorld(new ' + p[0] + '("Parallel' + p[0] + '"));' for p in par_wh ]
-    parallel_worlds = '\n'.join(parallel_worlds_list)
-
     return template.format(includes=includes,
             varname=varname,
             detector_class_name=detector_class_name,
-            detector_params=detector_params,
-            parallel_worlds=parallel_worlds)
+            detector_params=detector_params)
 
-def compile(sources, includes, d_wh, par_wh, output=None, other_flags=None, g4config_path=None):
+def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_path=None):
     compiler, flags = detect_compiler.compiler_and_flags()
 
     # determine the Geant4-specific compilation flags
@@ -60,7 +54,7 @@ def compile(sources, includes, d_wh, par_wh, output=None, other_flags=None, g4co
     logging.info('Will produce the following output file: ' + output)
     output_flags = ['-o', output]
 
-    frontend = get_t4g4_frontend_functions(d_wh, par_wh)
+    frontend = get_t4g4_frontend_functions(d_wh)
     logging.debug('frontend code: ' + frontend)
 
     with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+') as frontend_file:

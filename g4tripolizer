@@ -12,8 +12,6 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-o', '--output', help='name of the file to generate')
 parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', help='name of the detector-construction class')
-parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append', default=[])
-parser.add_argument('--no-parallel-detection', help='do not try to detect parallel geometries', action='store_true', default=False)
 parser.add_argument('--geant4-config', help='path to the geant4-config executable')
 parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
 parser.add_argument('sources', nargs='*', help='source files')
@@ -49,31 +47,11 @@ else:
             many=False,
             required=True)
 
-if args.parallel or args.no_parallel_detection:
-    parallel = args.parallel
-    parallel_wheaders = [(p,
-        find_classes.find_header_for_class(
-            p,
-            dirs=args.include,
-            suffixes=header_suffixes)
-        ) for p in parallel]
-else:
-    parallel_wheaders = find_classes.find_in_dirs(
-            base='G4VUserParallelWorld',
-            dirs=args.include,
-            suffixes=header_suffixes)
-    if len(parallel_wheaders)>1:
-        logging.warning(
-                'found several parallel worlds. I will apply them in the following order: '
-                + str(p[0] for p in parallel_wheaders)
-                + '. If this is not what you want, you should specify the -p option.')
-
 import generate_library
 generate_library.compile(
         args.sources,
         args.include,
         detector_wheader,
-        parallel_wheaders,
         output=args.output,
         other_flags=remaining_args,
         g4config_path=args.geant4_config

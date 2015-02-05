@@ -7,7 +7,6 @@ extern "C" G4VUserDetectorConstruction *createG4Geometry() {{
   G4RunManager *runManager = new G4RunManager;
   G4VUserDetectorConstruction *{varname} = new {detector_class_name}({detector_params});
   runManager->SetUserInitialization({varname});
-  {parallel_worlds}
   return {varname};
 }}
 
