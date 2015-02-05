@@ -1,0 +1,21 @@
+#include "G4VUserDetectorConstruction.hh"
+#include "G4GeometryManager.hh"
+#include "G4RunManager.hh"
+{includes}
+
+extern "C" G4VUserDetectorConstruction *createG4Geometry() {{
+  G4RunManager *runManager = new G4RunManager;
+  G4VUserDetectorConstruction *{varname} = new {detector_class_name}({detector_params});
+  runManager->SetUserInitialization({varname});
+  {parallel_worlds}
+  return {varname};
+}}
+
+extern "C" void deleteG4Geometry(G4VUserDetectorConstruction *aGeom) {{
+  // reopen geometry before deleting it
+  G4GeometryManager *manager = G4GeometryManager::GetInstance();
+  if(manager->IsGeometryClosed())
+    manager->OpenGeometry();
+  delete aGeom;
+}}
+
