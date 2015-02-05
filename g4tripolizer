@@ -9,17 +9,18 @@ parser = argparse.ArgumentParser(
         epilog='Any options after `--\' will be passed to the compiler.')
 
 # arguments
-parser.add_argument('-o', '--output', help='name of the file to generate', default='libG4Tripolizer.so')
-parser.add_argument('-I', '--include', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
+parser.add_argument('-o', '--output', help='name of the file to generate')
+parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', help='name of the detector-construction class')
 parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append')
+parser.add_argument('--geant4-config', help='path to the geant4-config executable')
 parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
 parser.add_argument('sources', nargs='*', help='source files')
 
 # parse the arguments
 # limit argument parsing to args before --
 last_arg_to_parse = next((i for i,v in enumerate(sys.argv) if v=='--'), len(sys.argv))
-args = parser.parse_args(sys.argv[:last_arg_to_parse])
+args = parser.parse_args(sys.argv[1:last_arg_to_parse])
 remaining_args = sys.argv[last_arg_to_parse+1:]
 
 #define the logger
@@ -64,8 +65,16 @@ else:
         logging.warning(
                 'found several parallel worlds. I will apply them in the following order: '
                 + str(p[0] for p in parallel_wheaders)
-                + '. If this is not what you want, you should explicitly use the -p option.')
+                + '. If this is not what you want, you should specify the -p option.')
 
-print detector_wheader
-print parallel_wheaders
+import generate_library
+generate_library.compile(
+        args.sources,
+        args.include,
+        detector_wheader,
+        parallel_wheaders,
+        output=args.output,
+        other_flags=remaining_args,
+        g4config_path=args.geant4_config
+        )
 
