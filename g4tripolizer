@@ -12,7 +12,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-o', '--output', help='name of the file to generate')
 parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', help='name of the detector-construction class')
-parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append')
+parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append', default=[])
+parser.add_argument('--no-parallel-detection', help='do not try to detect parallel geometries', action='store_true', default=False)
 parser.add_argument('--geant4-config', help='path to the geant4-config executable')
 parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
 parser.add_argument('sources', nargs='*', help='source files')
@@ -48,7 +49,7 @@ else:
             many=False,
             required=True)
 
-if args.parallel:
+if args.parallel or args.no_parallel_detection:
     parallel = args.parallel
     parallel_wheaders = [(p,
         find_classes.find_header_for_class(
