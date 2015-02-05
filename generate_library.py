@@ -3,6 +3,35 @@ from distutils.spawn import find_executable
 import subprocess
 import shlex
 import logging
+import inspect
+import os.path
+import sys
+import tempfile
+
+def get_t4g4_frontend_functions(d_wh, par_wh):
+    current_module = sys.modules[__name__]
+    module_dir = os.path.dirname(inspect.getfile(current_module))
+    template_fname = os.path.join(module_dir, 'frontend.cc.in')
+    with open(template_fname) as template_f: template = template_f.read()
+
+    include_directives = ['#include "' + d_wh[1] + '"']
+    include_directives += ['#include "' + p[1] + '"' for p in par_wh]
+    includes = '\n'.join(include_directives)
+
+    varname = 'a_detector'
+
+    detector_class_name=d_wh[0]
+    detector_params=''
+
+    # instantiation of parallel worlds. no parameters for the moment
+    parallel_worlds_list = [ varname + '->RegisterParallelWorld(new ' + p[0] + '("Parallel' + p[0] + '"));' for p in par_wh ]
+    parallel_worlds = '\n'.join(parallel_worlds_list)
+
+    return template.format(includes=includes,
+            varname=varname,
+            detector_class_name=detector_class_name,
+            detector_params=detector_params,
+            parallel_worlds=parallel_worlds)
 
 def compile(sources, includes, d_wh, par_wh, output=None, other_flags=None, g4config_path=None):
     compiler, flags = detect_compiler.compiler_and_flags()
@@ -31,9 +60,27 @@ def compile(sources, includes, d_wh, par_wh, output=None, other_flags=None, g4co
     logging.info('Will produce the following output file: ' + output)
     output_flags = ['-o', output]
 
-    # the CLI to execute
-    compiler_cli = [compiler] + flags + g4flags + other_flags + include_flags + sources + output_flags
+    frontend = get_t4g4_frontend_functions(d_wh, par_wh)
+    logging.debug('frontend code: ' + frontend)
 
-    logging.info('Running compilation...')
-    logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
-    subprocess.check_call(compiler_cli)
+    with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+') as frontend_file:
+
+        frontend_file.write(frontend)
+        frontend_file.flush()
+        frontend_file.seek(0)
+
+        frontend_file_name = frontend_file.name
+
+        # the CLI to execute
+        compiler_cli = [compiler] + \
+                flags + \
+                g4flags + \
+                other_flags + \
+                include_flags + \
+                sources + \
+                [frontend_file_name] + \
+                output_flags
+
+        logging.info('Running compilation...')
+        logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
+        subprocess.check_call(compiler_cli)
