@@ -3,10 +3,8 @@
 
 import argparse
 
-REGISTERED='®'
-
 parser = argparse.ArgumentParser(
-        description='Convert source code for a Geant4 detector construction into a geometry that can be read by TRIPOLI-4'+REGISTERED+'.',
+        description='Convert source code for a Geant4 detector construction into a geometry that can be read by TRIPOLI-4®.',
         epilog='Any unrecognized CLI options will be passed to the compiler.')
 
 # arguments
