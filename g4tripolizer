@@ -2,27 +2,34 @@
 # coding: utf-8
 
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(
         description='Convert source code for a Geant4 detector construction into a geometry that can be read by TRIPOLI-4®.',
-        epilog='Any unrecognized CLI options will be passed to the compiler.')
+        epilog='Any options after `--\' will be passed to the compiler.')
 
 # arguments
 parser.add_argument('-o', '--output', help='name of the file to generate', default='libG4Tripolizer.so')
 parser.add_argument('-I', '--include', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', help='name of the detector-construction class')
 parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append')
-parser.add_argument('--', dest='remanining_flags', metavar='FLAG', nargs='*', help='pass all the remaining flags to the compiler')
+parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
+parser.add_argument('sources', nargs='*', help='source files')
 
 # parse the arguments
-args = parser.parse_args()
+# limit argument parsing to args before --
+last_arg_to_parse = next((i for i,v in enumerate(sys.argv) if v=='--'), len(sys.argv))
+args = parser.parse_args(sys.argv[:last_arg_to_parse])
+remaining_args = sys.argv[last_arg_to_parse+1:]
 
 #define the logger
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.WARNING - 10*args.verbose)
 
 # process the options
 import find_classes
+
+header_suffixes = ['.hh', '.hpp', '.h']
 
 if args.detector:
     detector = args.detector
@@ -30,7 +37,7 @@ else:
     detector = find_classes.find_in_dirs(
             base='G4VUserDetectorConstruction',
             dirs=args.include,
-            suffixes=['.hh', '.hpp', '.h'],
+            suffixes=header_suffixes,
             many=False,
             required=True)
 
@@ -40,13 +47,27 @@ else:
     parallel = find_classes.find_in_dirs(
             base='G4VUserParallelWorld',
             dirs=args.include,
-            suffixes=['.hh', '.hpp', '.h'])
+            suffixes=header_suffixes)
     if len(parallel)>1:
         logging.warning(
                 'found several parallel worlds. I will apply them in the following order: '
                 + str(parallel)
                 + '. If this is not what you want, you should explicitly use the -p option.')
 
-print detector
-print parallel
+detector_wheader = (detector,
+        find_classes.find_header_for_class(
+            detector,
+            dirs=args.include,
+            suffixes=header_suffixes)
+        )
+
+parallel_wheaders = [(p,
+    find_classes.find_header_for_class(
+        p,
+        dirs=args.include,
+        suffixes=header_suffixes)
+    ) for p in parallel]
+
+print detector_wheader
+print parallel_wheaders
 

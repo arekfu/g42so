@@ -1,4 +1,8 @@
 import logging
+import os.path
+import glob
+import itertools
+import re
 
 def find(base, headers, inheritance='public', many=True,
         required=False):
@@ -6,14 +10,18 @@ def find(base, headers, inheritance='public', many=True,
     according to the specified inheritance pattern (defaults to 'public').
     Returns a sequence of class names.'''
 
-    import re
-    regex = 'class\s+([a-zA-Z_]\w+)\s*:\s*' + inheritance + '\s*' + base
-    cregex = re.compile(regex)
+    regex = '^\s*class\s+([a-zA-Z_]\w+)\s*:\s*' + inheritance + '\s*' + base
+    logging.debug('regex: ' + regex)
+    cregex = re.compile(regex, re.MULTILINE)
 
     class_names = []
     for header in headers:
+        logging.debug('scanning header: ' + header)
         with open(header) as hfile: text=hfile.read()
-        class_names += (match.group(1) for match in re.finditer(cregex, text))
+        found_classes = list(match.group(1) for match in re.finditer(cregex, text))
+        if found_classes:
+            logging.debug(str(len(found_classes)) + ' matches in this file')
+        class_names += found_classes
 
     missing = RuntimeError('could not find any '
             + base
@@ -39,11 +47,22 @@ def find(base, headers, inheritance='public', many=True,
 
 def find_in_dirs(base, dirs, suffixes=[''], inheritance='public', many=True,
         required=False):
-    import os.path
-    import glob
-    import itertools
-
-    return find(base, headers=itertools.chain.from_iterable(
+    headers = itertools.chain.from_iterable(
             glob.iglob(os.path.join(directory, '*'+suffix))
-            for suffix in suffixes for directory in dirs),
+            for suffix in suffixes for directory in dirs)
+    return find(base, headers,
             inheritance=inheritance, many=many, required=required)
+
+def find_header_for_class(name, dirs, suffixes=['']):
+    regex = '^\s*class\s+' + name + '\s*[:{]'
+    cregex = re.compile(regex, re.MULTILINE)
+
+    headers = itertools.chain.from_iterable(
+            (glob.iglob(os.path.join(directory, '*'+suffix)) for suffix in suffixes for directory in dirs)
+            )
+    for header in headers:
+        with open(header) as hfile: text=hfile.read()
+        if re.search(cregex, text):
+            return header
+
+    return None
