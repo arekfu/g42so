@@ -20,6 +20,16 @@ parser.add_argument('--', dest='remanining_flags', metavar='FLAG', nargs='*', he
 args = parser.parse_args()
 
 import detect_compiler
-
 print detect_compiler.compiler_and_flags()
-print args.include
+
+import find_classes
+print find_classes.find(base='G4VUserDetectorConstruction', headers=[
+    '../t4g4interface-test/geometries/B1/include/B1DetectorConstruction.hh',
+    '../t4g4interface-test/geometries/B2b/include/B2bChamberParameterisation.hh',
+    '../t4g4interface-test/geometries/B2b/include/B2bDetectorConstruction.hh',
+    '../t4g4interface-test/geometries/B2b/include/B2bDetectorMessenger.hh',
+    '../t4g4interface-test/geometries/B2b/include/B2TrackerHit.hh',
+    '../t4g4interface-test/geometries/B2b/include/B2TrackerSD.hh',
+    '../t4g4interface-test/geometries/B3/include/B3DetectorConstruction.hh',
+    '../t4g4interface-test/geometries/B4/include/B4DetectorConstruction.hh'
+    ])
