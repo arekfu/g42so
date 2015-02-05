@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(
 
 # arguments
 parser.add_argument('-o', '--output', help='name of the file to generate', default='libG4Tripolizer.so')
-parser.add_argument('-I', '--include', help='directories to search for include files (may be specified multiple times)', action='append')
+parser.add_argument('-I', '--include', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', help='name of the detector-construction class')
 parser.add_argument('-p', '--parallel', help='name of a class defining a parallel geometry (may be specified multiple times; order matters)', action='append')
 parser.add_argument('--', dest='remanining_flags', metavar='FLAG', nargs='*', help='pass all the remaining flags to the compiler')
@@ -19,17 +19,36 @@ parser.add_argument('--', dest='remanining_flags', metavar='FLAG', nargs='*', he
 # parse the arguments
 args = parser.parse_args()
 
-import detect_compiler
-print detect_compiler.compiler_and_flags()
+#define the logger
+import logging
+logging.basicConfig(level=logging.WARNING)
 
+# process the options
 import find_classes
-print find_classes.find(base='G4VUserDetectorConstruction', headers=[
-    '../t4g4interface-test/geometries/B1/include/B1DetectorConstruction.hh',
-    '../t4g4interface-test/geometries/B2b/include/B2bChamberParameterisation.hh',
-    '../t4g4interface-test/geometries/B2b/include/B2bDetectorConstruction.hh',
-    '../t4g4interface-test/geometries/B2b/include/B2bDetectorMessenger.hh',
-    '../t4g4interface-test/geometries/B2b/include/B2TrackerHit.hh',
-    '../t4g4interface-test/geometries/B2b/include/B2TrackerSD.hh',
-    '../t4g4interface-test/geometries/B3/include/B3DetectorConstruction.hh',
-    '../t4g4interface-test/geometries/B4/include/B4DetectorConstruction.hh'
-    ])
+
+if args.detector:
+    detector = args.detector
+else:
+    detector = find_classes.find_in_dirs(
+            base='G4VUserDetectorConstruction',
+            dirs=args.include,
+            suffixes=['.hh', '.hpp', '.h'],
+            many=False,
+            required=True)
+
+if args.parallel:
+    parallel = args.parallel
+else:
+    parallel = find_classes.find_in_dirs(
+            base='G4VUserParallelWorld',
+            dirs=args.include,
+            suffixes=['.hh', '.hpp', '.h'])
+    if len(parallel)>1:
+        logging.warning(
+                'found several parallel worlds. I will apply them in the following order: '
+                + str(parallel)
+                + '. If this is not what you want, you should explicitly use the -p option.')
+
+print detector
+print parallel
+
