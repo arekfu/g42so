@@ -14,36 +14,36 @@ def find(base, headers, inheritance='public', many=True,
     logging.debug('regex: ' + regex)
     cregex = re.compile(regex, re.MULTILINE)
 
-    class_names = []
+    classes = []
     for header in headers:
         logging.debug('scanning header: ' + header)
         with open(header) as hfile: text=hfile.read()
         found_classes = list(match.group(1) for match in re.finditer(cregex, text))
         if found_classes:
             logging.debug(str(len(found_classes)) + ' matches in this file')
-        class_names += found_classes
+        classes += [(c, header) for c in found_classes]
 
     missing = RuntimeError('could not find any '
             + base
             + '-derived class in the specified files.')
-    if required and not class_names:
+    if required and not classes:
         raise missing
     if not many:
         try:
-            class_name = class_names[0]
+            the_class = classes[0]
         except IndexError:
             if not required:
                 return None
             else:
                 raise missing
-        if len(class_names)>1:
+        if len(classes)>1:
             logging.warning('found several '
                     + base
                     + '-derived classes in the specified files. Selecting '
-                    + class_name + '.')
-        return class_name
+                    + the_class[0] + '(from ' + the_class[1] + ').')
+        return the_class
     else:
-        return class_names
+        return classes
 
 def find_in_dirs(base, dirs, suffixes=[''], inheritance='public', many=True,
         required=False):

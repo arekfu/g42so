@@ -33,8 +33,14 @@ header_suffixes = ['.hh', '.hpp', '.h']
 
 if args.detector:
     detector = args.detector
+    detector_wheader = (detector,
+            find_classes.find_header_for_class(
+                detector,
+                dirs=args.include,
+                suffixes=header_suffixes)
+            )
 else:
-    detector = find_classes.find_in_dirs(
+    detector_wheader = find_classes.find_in_dirs(
             base='G4VUserDetectorConstruction',
             dirs=args.include,
             suffixes=header_suffixes,
@@ -43,30 +49,22 @@ else:
 
 if args.parallel:
     parallel = args.parallel
+    parallel_wheaders = [(p,
+        find_classes.find_header_for_class(
+            p,
+            dirs=args.include,
+            suffixes=header_suffixes)
+        ) for p in parallel]
 else:
-    parallel = find_classes.find_in_dirs(
+    parallel_wheaders = find_classes.find_in_dirs(
             base='G4VUserParallelWorld',
             dirs=args.include,
             suffixes=header_suffixes)
-    if len(parallel)>1:
+    if len(parallel_wheaders)>1:
         logging.warning(
                 'found several parallel worlds. I will apply them in the following order: '
-                + str(parallel)
+                + str(p[0] for p in parallel_wheaders)
                 + '. If this is not what you want, you should explicitly use the -p option.')
-
-detector_wheader = (detector,
-        find_classes.find_header_for_class(
-            detector,
-            dirs=args.include,
-            suffixes=header_suffixes)
-        )
-
-parallel_wheaders = [(p,
-    find_classes.find_header_for_class(
-        p,
-        dirs=args.include,
-        suffixes=header_suffixes)
-    ) for p in parallel]
 
 print detector_wheader
 print parallel_wheaders
