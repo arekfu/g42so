@@ -8,10 +8,10 @@ import os.path
 import sys
 import tempfile
 
-def get_t4g4_frontend_functions(d_wh):
+def get_t4g4_wrapper_functions(d_wh):
     current_module = sys.modules[__name__]
     module_dir = os.path.dirname(inspect.getfile(current_module))
-    template_fname = os.path.join(module_dir, 'frontend.cc.in')
+    template_fname = os.path.join(module_dir, 'wrapper.cc.in')
     with open(template_fname) as template_f: template = template_f.read()
 
     include_directives = ['#include "' + d_wh[1] + '"']
@@ -54,16 +54,16 @@ def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_pat
     logging.info('Will produce the following output file: ' + output)
     output_flags = ['-o', output]
 
-    frontend = get_t4g4_frontend_functions(d_wh)
-    logging.debug('frontend code: ' + frontend)
+    wrapper = get_t4g4_wrapper_functions(d_wh)
+    logging.debug('wrapper code: ' + wrapper)
 
-    with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+') as frontend_file:
+    with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+') as wrapper_file:
 
-        frontend_file.write(frontend)
-        frontend_file.flush()
-        frontend_file.seek(0)
+        wrapper_file.write(wrapper)
+        wrapper_file.flush()
+        wrapper_file.seek(0)
 
-        frontend_file_name = frontend_file.name
+        wrapper_file_name = wrapper_file.name
 
         # the CLI to execute
         compiler_cli = [compiler] + \
@@ -72,7 +72,7 @@ def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_pat
                 other_flags + \
                 include_flags + \
                 sources + \
-                [frontend_file_name] + \
+                [wrapper_file_name] + \
                 output_flags
 
         logging.info('Running compilation...')
