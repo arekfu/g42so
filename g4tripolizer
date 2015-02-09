@@ -9,18 +9,30 @@ parser = argparse.ArgumentParser(
         epilog='Any options after `--\' will be passed to the compiler.')
 
 # arguments
+parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
 parser.add_argument('-o', '--output', metavar='OUTPUT_FILE', help='name of the file to generate')
 parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
 parser.add_argument('-d', '--detector', metavar='DETECTOR_CLASS', help='name of the detector-construction class')
 parser.add_argument('--geant4-config', help='path to the geant4-config executable')
-parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
-parser.add_argument('sources', metavar='source_file', nargs='+', help='source files')
+parser.add_argument('--dump-wrapper-template', help='dump (to stdout) a template for custom wrapper functions', action='store_true')
+parser.add_argument('--custom-wrapper', help='use this if you are providing your custom wrapper as a source file. If this option is not specified, %(prog)s will automatically generate a wrapper.', action='store_true')
+parser.add_argument('sources', metavar='source_file', nargs='*', help='source files')
 
 # parse the arguments
 # limit argument parsing to args before --
 last_arg_to_parse = next((i for i,v in enumerate(sys.argv) if v=='--'), len(sys.argv))
 args = parser.parse_args(sys.argv[1:last_arg_to_parse])
 remaining_args = sys.argv[last_arg_to_parse+1:]
+
+# dump the wrapper template
+import generate_library
+if args.dump_wrapper_template:
+    print generate_library.get_dummy_t4g4_wrapper_functions()
+    sys.exit(0)
+
+# check for the presence of source files
+if not args.sources:
+    parser.error('too few arguments')
 
 #define the logger
 import logging
@@ -47,13 +59,13 @@ else:
             many=False,
             required=True)
 
-import generate_library
 generate_library.compile(
         args.sources,
         args.include,
         detector_wheader,
         output=args.output,
         other_flags=remaining_args,
-        g4config_path=args.geant4_config
+        g4config_path=args.geant4_config,
+        custom_wrapper=args.custom_wrapper
         )
 

@@ -1,20 +1,38 @@
+/* This source files provides wrappers around the construction and the
+ * destruction of your detector-construction class, which should derive from
+ * G4VUserDetectorConstruction. You can expand the code as you like, for
+ * instance by adding parameters to the class constructor or by calling your
+ * detector-construction factories. Just make sure you expose the required
+ * createG4Geometry and deleteG4Geometry functions.
+ *
+ * Note that the Geant4 kernel is NOT available here, e.g. there is no
+ * RunManager around at the moment these functions are called. This might
+ * change in the future.
+ *
+ * Once you have modified this file, save it and pass it to G4Tripolizer as a
+ * source file. Make sure you add the --custom-wrapper CLI option, so that
+ * G4Tripolizer does not include its standard wrapper.
+ */
+
 #include "G4VUserDetectorConstruction.hh"
 #include "G4GeometryManager.hh"
-#include "G4RunManager.hh"
+
+// This is where you should #include your custom headers
 {includes}
 
-extern "C" G4VUserDetectorConstruction *createG4Geometry() {{
-  G4RunManager *runManager = new G4RunManager;
-  G4VUserDetectorConstruction *{varname} = new {detector_class_name}({detector_params});
-  runManager->SetUserInitialization({varname});
-  return {varname};
-}}
+extern "C" {{
 
-extern "C" void deleteG4Geometry(G4VUserDetectorConstruction *aGeom) {{
-  // reopen geometry before deleting it
-  G4GeometryManager *manager = G4GeometryManager::GetInstance();
-  if(manager->IsGeometryClosed())
-    manager->OpenGeometry();
-  delete aGeom;
-}}
+  G4VUserDetectorConstruction *createG4Geometry() {{
+    // Replace 'MyDetectorConstruction' with the name of your class
+    G4VUserDetectorConstruction *{varname} = new {detector_class_name}({detector_params});
+    return {varname};
+  }}
 
+  void deleteG4Geometry(G4VUserDetectorConstruction *aGeom) {{
+    G4GeometryManager *manager = G4GeometryManager::GetInstance();
+    if(manager->IsGeometryClosed())
+      manager->OpenGeometry();
+    delete aGeom;
+  }}
+
+}}

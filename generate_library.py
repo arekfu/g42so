@@ -4,6 +4,7 @@ import subprocess
 import shlex
 import logging
 import inspect
+import os
 import os.path
 import sys
 import tempfile
@@ -27,7 +28,10 @@ def get_t4g4_wrapper_functions(d_wh):
             detector_class_name=detector_class_name,
             detector_params=detector_params)
 
-def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_path=None):
+def get_dummy_t4g4_wrapper_functions():
+    return get_t4g4_wrapper_functions(('MyDetectorConstruction', 'MyDetectorConstructionh.hh'))
+
+def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_path=None, custom_wrapper=None):
     compiler, flags = detect_compiler.compiler_and_flags()
 
     # determine the Geant4-specific compilation flags
@@ -54,27 +58,36 @@ def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_pat
     logging.info('Will produce the following output file: ' + output)
     output_flags = ['-o', output]
 
-    wrapper = get_t4g4_wrapper_functions(d_wh)
-    logging.debug('wrapper code: ' + wrapper)
+    # the CLI to execute
+    compiler_cli = [compiler] + \
+            flags + \
+            g4flags + \
+            other_flags + \
+            include_flags + \
+            sources
 
-    with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+') as wrapper_file:
+    if not custom_wrapper:
+        wrapper = get_t4g4_wrapper_functions(d_wh)
+        logging.debug('wrapper code: ' + wrapper)
 
-        wrapper_file.write(wrapper)
-        wrapper_file.flush()
-        wrapper_file.seek(0)
+        with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+', delete=False) as wrapper_file:
 
-        wrapper_file_name = wrapper_file.name
+            wrapper_file.write(wrapper)
+            wrapper_file.flush()
+            wrapper_file.seek(0)
 
-        # the CLI to execute
-        compiler_cli = [compiler] + \
-                flags + \
-                g4flags + \
-                other_flags + \
-                include_flags + \
-                sources + \
-                [wrapper_file_name] + \
-                output_flags
+            wrapper_file_name = wrapper_file.name
 
+            compiler_cli += [wrapper_file_name]
+    else:
+        wrapper_file_name = None
+
+    compiler_cli += output_flags
+
+    try:
         logging.info('Running compilation...')
         logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
         subprocess.check_call(compiler_cli)
+    finally:
+        if wrapper_file_name:
+            os.remove(wrapper_file_name)
