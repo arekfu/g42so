@@ -9,12 +9,12 @@ parser = argparse.ArgumentParser(
         epilog='Any options after `--\' will be passed to the compiler.')
 
 # arguments
-parser.add_argument('-o', '--output', help='name of the file to generate')
+parser.add_argument('-o', '--output', metavar='OUTPUT_FILE', help='name of the file to generate')
 parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
-parser.add_argument('-d', '--detector', help='name of the detector-construction class')
+parser.add_argument('-d', '--detector', metavar='DETECTOR_CLASS', help='name of the detector-construction class')
 parser.add_argument('--geant4-config', help='path to the geant4-config executable')
 parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
-parser.add_argument('sources', nargs='+', help='source files')
+parser.add_argument('sources', metavar='source_file', nargs='+', help='source files')
 
 # parse the arguments
 # limit argument parsing to args before --
