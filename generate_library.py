@@ -9,29 +9,56 @@ import os.path
 import sys
 import tempfile
 
-def get_t4g4_wrapper_functions(d_wh):
+def get_t4g4_detector_wrapper_functions(d_wh, params=''):
+    return get_t4g4_wrapper_functions(d_wh,
+            template_basename = 'detector_wrapper.cc.in',
+            varname='aDetector',
+            params=params)
+
+def get_t4g4_pga_wrapper_functions(pga_wh, params=''):
+    return get_t4g4_wrapper_functions(pga_wh,
+            template_basename = 'pga_wrapper.cc.in',
+            varname='aPGA',
+            params=params)
+
+def get_t4g4_wrapper_functions(wh, template_basename, varname='a_var', params='/* parameters go here */'):
+
     current_module = sys.modules[__name__]
     module_dir = os.path.dirname(inspect.getfile(current_module))
-    template_fname = os.path.join(module_dir, 'wrapper.cc.in')
+    template_fname = os.path.join(module_dir, template_basename)
     with open(template_fname) as template_f: template = template_f.read()
 
-    include_directives = ['#include "' + d_wh[1] + '"']
+    include_directives = ['#include "' + wh[1] + '"']
     includes = '\n'.join(include_directives)
 
-    varname = 'a_detector'
+    class_name = wh[0]
 
-    detector_class_name=d_wh[0]
-    detector_params=''
-
-    return template.format(includes=includes,
+    wrapper = template.format(includes=includes,
             varname=varname,
-            detector_class_name=detector_class_name,
-            detector_params=detector_params)
+            class_name=class_name,
+            params=params
+            )
 
-def get_dummy_t4g4_wrapper_functions():
-    return get_t4g4_wrapper_functions(('MyDetectorConstruction', 'MyDetectorConstructionh.hh'))
+    return wrapper
 
-def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_path=None, custom_wrapper=None):
+def get_dummy_t4g4_detector_wrapper_functions():
+    return get_t4g4_detector_wrapper_functions(('MyDetectorConstruction', 'MyDetectorConstruction.hh'))
+
+def get_dummy_t4g4_pga_wrapper_functions():
+    return get_t4g4_pga_wrapper_functions(('MyPrimaryGeneratorAction', 'MyPrimaryGeneratorAction.hh'))
+
+def write_temp_wrapper_file(wrapper):
+    logging.debug('writing wrapper code: ' + wrapper)
+
+    with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+', delete=False) as wrapper_file:
+
+        wrapper_file.write(wrapper)
+        wrapper_file.flush()
+        wrapper_file.seek(0)
+
+        return wrapper_file.name
+
+def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None, g4config_path=None, custom_detector_wrapper=None, custom_pga_wrapper=None):
     compiler, flags = detect_compiler.compiler_and_flags()
 
     # determine the Geant4-specific compilation flags
@@ -58,36 +85,35 @@ def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_pat
     logging.info('Will produce the following output file: ' + output)
     output_flags = ['-o', output]
 
+    if not custom_detector_wrapper:
+        detector_wrapper = get_t4g4_detector_wrapper_functions(d_wh)
+        detector_wrapper_file_name = write_temp_wrapper_file(detector_wrapper)
+        sources = [detector_wrapper_file_name] + sources
+    else:
+        detector_wrapper_file_name = None
+
+    if pga_wh and not custom_pga_wrapper:
+        pga_wrapper = get_t4g4_pga_wrapper_functions(pga_wh)
+        pga_wrapper_file_name = write_temp_wrapper_file(pga_wrapper)
+        sources = [pga_wrapper_file_name] + sources
+    else:
+        pga_wrapper_file_name = None
+
     # the CLI to execute
     compiler_cli = [compiler] + \
             flags + \
             include_flags + \
             sources + \
             g4flags + \
-            other_flags
-
-    if not custom_wrapper:
-        wrapper = get_t4g4_wrapper_functions(d_wh)
-        logging.debug('wrapper code: ' + wrapper)
-
-        with tempfile.NamedTemporaryFile(suffix='.cc', mode='w+', delete=False) as wrapper_file:
-
-            wrapper_file.write(wrapper)
-            wrapper_file.flush()
-            wrapper_file.seek(0)
-
-            wrapper_file_name = wrapper_file.name
-
-            compiler_cli += [wrapper_file_name]
-    else:
-        wrapper_file_name = None
-
-    compiler_cli += output_flags
+            other_flags + \
+            output_flags
 
     try:
         logging.info('Running compilation...')
         logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
         subprocess.check_call(compiler_cli)
     finally:
-        if wrapper_file_name:
-            os.remove(wrapper_file_name)
+        if detector_wrapper_file_name:
+            os.remove(detector_wrapper_file_name)
+        if pga_wrapper_file_name:
+            os.remove(pga_wrapper_file_name)

@@ -1,0 +1,34 @@
+/* This source files provides wrappers around the construction and the
+ * destruction of your primary-generator-action class, which should derive from
+ * G4VUserPrimaryGeneratorAction. You can expand the code as you like, for
+ * instance by adding parameters to the class constructor or by calling your
+ * particle factories. Just make sure you expose the required createG4PGA and
+ * deleteG4PGA functions.
+ *
+ * Note that the Geant4 kernel is NOT available here, e.g. there is no
+ * RunManager around at the moment these functions are called. This might
+ * change in the future.
+ *
+ * Once you have modified this file, save it and pass it to t4g4 as a source
+ * file. Make sure you add the --custom-pga-wrapper CLI option, so that
+ * t4g4 does not include its standard wrapper.
+ */
+
+#include "G4VUserPrimaryGeneratorAction.hh"
+
+// This is where you should #include your custom headers
+{includes}
+
+extern "C" {{
+
+  G4VUserPrimaryGeneratorAction *createG4PGA() {{
+    // Replace "{class_name}" with the name of your class
+    G4VUserPrimaryGeneratorAction *{varname} = new {class_name}({params});
+    return {varname};
+  }}
+
+  void deleteG4PGA(G4VUserPrimaryGeneratorAction *aPGA) {{
+    delete aPGA;
+  }}
+
+}}

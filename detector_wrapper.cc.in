@@ -10,7 +10,7 @@
  * change in the future.
  *
  * Once you have modified this file, save it and pass it to t4g4 as a source
- * file. Make sure you add the --custom-wrapper CLI option, so that
+ * file. Make sure you add the --custom-detector-wrapper CLI option, so that
  * t4g4 does not include its standard wrapper.
  */
 
@@ -23,8 +23,8 @@
 extern "C" {{
 
   G4VUserDetectorConstruction *createG4Geometry() {{
-    // Replace 'MyDetectorConstruction' with the name of your class
-    G4VUserDetectorConstruction *{varname} = new {detector_class_name}({detector_params});
+    // Replace "{class_name}" with the name of your class
+    G4VUserDetectorConstruction *{varname} = new {class_name}({params});
     return {varname};
   }}
 
