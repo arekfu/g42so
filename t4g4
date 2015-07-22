@@ -8,43 +8,71 @@ import logging
 import find_classes
 
 parser = argparse.ArgumentParser(
-        description='Convert source code for a Geant4 detector construction into a geometry that can be read by TRIPOLI-4®.',
-        epilog='Any options after `--\' will be passed to the compiler.')
+    description='Convert source code for a Geant4 detector construction '
+                'into a geometry that can be read by TRIPOLI-4®.',
+    epilog='Any options after `--\' will be passed to the compiler.'
+    )
 
 # arguments
-parser.add_argument('-v', '--verbose', help='increase verbosity', action='count', default=0)
-parser.add_argument('-o', '--output', metavar='OUTPUT_FILE', help='name of the file to generate')
-parser.add_argument('-I', '--include', metavar='INCLUDE_DIR', help='directories to search for header files (may be specified multiple times)', action='append', default=[])
-parser.add_argument('-d', '--detector', metavar='DETECTOR_CLASS', help='name of the detector-construction class')
-parser.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS', help='name of the primary-generator-action class')
-parser.add_argument('--geant4-config', help='path to the geant4-config executable')
-parser.add_argument('--dump-detector-wrapper-template', help='dump (to stdout) a template for custom wrapper functions for the detector class', action='store_true')
-parser.add_argument('--dump-pga-wrapper-template', help='dump (to stdout) a template for custom wrapper functions for the primary generator action class', action='store_true')
-parser.add_argument('--custom-detector-wrapper', help='use this if you are providing your custom wrapper for detector construction as a source file. If this option is not specified, %(prog)s will automatically generate a wrapper.', action='store_true')
-parser.add_argument('--custom-pga-wrapper', help='use this if you are providing your custom wrapper for the primary generator action as a source file. If this option is not specified, %(prog)s will automatically generate a wrapper.', action='store_true')
-parser.add_argument('sources', metavar='source_file', nargs='*', help='source files')
+parser.add_argument('-v', '--verbose', help='increase verbosity',
+                    action='count', default=0)
+parser.add_argument('-o', '--output', metavar='OUTPUT_FILE',
+                    help='name of the file to generate')
+parser.add_argument('-I', '--include', metavar='INCLUDE_DIR',
+                    help='directories to search for header files (may be '
+                         'specified multiple times)',
+                    action='append', default=[])
+parser.add_argument('-d', '--detector', metavar='DETECTOR_CLASS',
+                    help='name of the detector-construction class')
+parser.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS',
+                    help='name of the primary-generator-action class')
+parser.add_argument('--geant4-config',
+                    help='path to the geant4-config executable')
+parser.add_argument('--dump-detector-wrapper-template',
+                    help='dump (to stdout) a template for custom wrapper '
+                         'functions for the detector class',
+                    action='store_true')
+parser.add_argument('--dump-pga-wrapper-template',
+                    help='dump (to stdout) a template for custom wrapper '
+                         'functions for the primary generator action class',
+                    action='store_true')
+parser.add_argument('--custom-detector-wrapper',
+                    help='use this if you are providing your custom wrapper '
+                         'for detector construction as a source file. If '
+                         'this option is not specified, %(prog)s will '
+                         'automatically generate a wrapper.',
+                    action='store_true')
+parser.add_argument('--custom-pga-wrapper',
+                    help='use this if you are providing your custom wrapper '
+                         'for the primary generator action as a source file. '
+                         'If this option is not specified, %(prog)s will '
+                         'automatically generate a wrapper.',
+                         action='store_true')
+parser.add_argument('sources', metavar='source_file', nargs='*',
+                    help='source files')
 
 # parse the arguments
 # limit argument parsing to args before --
-last_arg_to_parse = next((i for i,v in enumerate(sys.argv) if v=='--'), len(sys.argv))
+last_arg_to_parse = next((i for i, v in enumerate(sys.argv) if v == '--'),
+                         len(sys.argv))
 args = parser.parse_args(sys.argv[1:last_arg_to_parse])
 remaining_args = sys.argv[last_arg_to_parse+1:]
 
 # dump the detector wrapper template
 if args.dump_detector_wrapper_template:
-    print generate_library.get_dummy_t4g4_detector_wrapper_functions()
+    print(generate_library.get_dummy_t4g4_detector_wrapper_functions())
     sys.exit(0)
 
 # dump the wrapper template
 if args.dump_pga_wrapper_template:
-    print generate_library.get_dummy_t4g4_pga_wrapper_functions()
+    print(generate_library.get_dummy_t4g4_pga_wrapper_functions())
     sys.exit(0)
 
 # check for the presence of source files
 if not args.sources:
     parser.error('too few arguments')
 
-#define the logger
+# define the logger
 logging.basicConfig(level=logging.WARNING - 10*args.verbose)
 
 # process the options
@@ -53,46 +81,50 @@ header_suffixes = ['.hh', '.hpp', '.h', '.hxx']
 # process the -d option -- either take the supplied class name or detect it
 if args.detector:
     detector = args.detector
-    detector_wheader = (detector,
-            find_classes.find_header_for_class(
-                detector,
-                dirs=args.include,
-                suffixes=header_suffixes)
+    detector_wheader = (
+        detector,
+        find_classes.find_header_for_class(
+            detector,
+            dirs=args.include,
+            suffixes=header_suffixes
             )
+        )
 else:
     detector_wheader = find_classes.find_in_dirs(
-            base='G4VUserDetectorConstruction',
-            dirs=args.include,
-            suffixes=header_suffixes,
-            many=False,
-            required=True)
+        base='G4VUserDetectorConstruction',
+        dirs=args.include,
+        suffixes=header_suffixes,
+        many=False,
+        required=True
+        )
 
 # process the -p option, if supplied
 if args.primary_generator_action:
     pga = args.primary_generator_action
-    pga_wheader = (pga,
-            find_classes.find_header_for_class(
-                pga,
-                dirs=args.include,
-                suffixes=header_suffixes)
+    pga_wheader = (
+        pga,
+        find_classes.find_header_for_class(
+            pga,
+            dirs=args.include,
+            suffixes=header_suffixes
             )
+        )
 else:
     pga_wheader = find_classes.find_in_dirs(
-            base='G4VUserPrimaryGeneratorAction',
-            dirs=args.include,
-            suffixes=header_suffixes,
-            many=False,
-            required=False)
+        base='G4VUserPrimaryGeneratorAction',
+        dirs=args.include,
+        suffixes=header_suffixes,
+        many=False,
+        required=False)
 
 generate_library.compile(
-        args.sources,
-        args.include,
-        detector_wheader,
-        pga_wheader,
-        output=args.output,
-        other_flags=remaining_args,
-        g4config_path=args.geant4_config,
-        custom_detector_wrapper=args.custom_detector_wrapper,
-        custom_pga_wrapper=args.custom_pga_wrapper
-        )
-
+    args.sources,
+    args.include,
+    detector_wheader,
+    pga_wheader,
+    output=args.output,
+    other_flags=remaining_args,
+    g4config_path=args.geant4_config,
+    custom_detector_wrapper=args.custom_detector_wrapper,
+    custom_pga_wrapper=args.custom_pga_wrapper
+    )
