@@ -61,10 +61,10 @@ def compile(sources, includes, d_wh, output=None, other_flags=None, g4config_pat
     # the CLI to execute
     compiler_cli = [compiler] + \
             flags + \
-            g4flags + \
-            other_flags + \
             include_flags + \
-            sources
+            sources + \
+            g4flags + \
+            other_flags
 
     if not custom_wrapper:
         wrapper = get_t4g4_wrapper_functions(d_wh)
