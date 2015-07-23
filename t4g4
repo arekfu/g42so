@@ -13,43 +13,51 @@ parser = argparse.ArgumentParser(
     epilog='Any options after `--\' will be passed to the compiler.'
     )
 
-# arguments
-parser.add_argument('-v', '--verbose', help='increase verbosity',
-                    action='count', default=0)
-parser.add_argument('-o', '--output', metavar='OUTPUT_FILE',
-                    help='name of the file to generate')
-parser.add_argument('-I', '--include', metavar='INCLUDE_DIR',
-                    help='directories to search for header files (may be '
-                         'specified multiple times)',
-                    action='append', default=[])
-parser.add_argument('-d', '--detector', metavar='DETECTOR_CLASS',
-                    help='name of the detector-construction class')
-parser.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS',
-                    help='name of the primary-generator-action class')
-parser.add_argument('--geant4-config',
-                    help='path to the geant4-config executable')
-parser.add_argument('--dump-detector-wrapper-template',
-                    help='dump (to stdout) a template for custom wrapper '
-                         'functions for the detector class',
-                    action='store_true')
-parser.add_argument('--dump-pga-wrapper-template',
-                    help='dump (to stdout) a template for custom wrapper '
-                         'functions for the primary generator action class',
-                    action='store_true')
-parser.add_argument('--custom-detector-wrapper',
-                    help='use this if you are providing your custom wrapper '
-                         'for detector construction as a source file. If '
-                         'this option is not specified, %(prog)s will '
-                         'automatically generate a wrapper.',
-                    action='store_true')
-parser.add_argument('--custom-pga-wrapper',
-                    help='use this if you are providing your custom wrapper '
-                         'for the primary generator action as a source file. '
-                         'If this option is not specified, %(prog)s will '
-                         'automatically generate a wrapper.',
-                         action='store_true')
-parser.add_argument('sources', metavar='source_file', nargs='*',
-                    help='source files')
+# general arguments
+g_general = parser.add_argument_group('general arguments')
+g_general.add_argument('-v', '--verbose', help='increase verbosity',
+                       action='count', default=0)
+g_general.add_argument('-o', '--output', metavar='OUTPUT_FILE',
+                       help='name of the file to generate')
+g_general.add_argument('-I', '--include', metavar='INCLUDE_DIR',
+                       help='directories to search for header files (may be '
+                            'specified multiple times)',
+                       action='append', default=[])
+g_general.add_argument('--geant4-config',
+                       help='path to the geant4-config executable')
+g_general.add_argument('sources', metavar='source_file', nargs='*',
+                       help='source files')
+
+
+# detector args
+g_detector = parser.add_argument_group('detector arguments')
+g_detector.add_argument('-d', '--detector', metavar='DETECTOR_CLASS',
+                        help='name of the detector-construction class')
+g_detector.add_argument('--dump-detector-wrapper-template',
+                        help='dump (to stdout) a template for custom wrapper '
+                             'functions for the detector class',
+                        action='store_true')
+g_detector.add_argument('--custom-detector-wrapper',
+                        help='use this if you are providing your custom '
+                             'wrapper for detector construction as a source '
+                             'file. If this option is not specified, %(prog)s '
+                             'will automatically generate a wrapper.',
+                        action='store_true')
+
+# pga args
+g_pga = parser.add_argument_group('primary-generator-action arguments')
+g_pga.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS',
+                   help='name of the primary-generator-action class')
+g_pga.add_argument('--dump-pga-wrapper-template',
+                   help='dump (to stdout) a template for custom wrapper '
+                        'functions for the primary generator action class',
+                   action='store_true')
+g_pga.add_argument('--custom-pga-wrapper',
+                   help='use this if you are providing your custom wrapper '
+                        'for the primary generator action as a source file. '
+                        'If this option is not specified, %(prog)s will '
+                        'automatically generate a wrapper.',
+                        action='store_true')
 
 # parse the arguments
 # limit argument parsing to args before --
