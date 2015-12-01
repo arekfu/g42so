@@ -33,7 +33,7 @@ g_general.add_argument('sources', metavar='source_file', nargs='*',
 g_detector = parser.add_argument_group('detector arguments')
 g_detector.add_argument('-d', '--detector', metavar='DETECTOR_CLASS',
                         help='name of the detector-construction class')
-g_detector.add_argument('--dump-detector-wrapper-template',
+g_detector.add_argument('--dump-detector-wrapper',
                         help='dump (to stdout) a template for custom wrapper '
                              'functions for the detector class',
                         action='store_true')
@@ -48,7 +48,7 @@ g_detector.add_argument('--custom-detector-wrapper',
 g_pga = parser.add_argument_group('primary-generator-action arguments')
 g_pga.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS',
                    help='name of the primary-generator-action class')
-g_pga.add_argument('--dump-pga-wrapper-template',
+g_pga.add_argument('--dump-pga-wrapper',
                    help='dump (to stdout) a template for custom wrapper '
                         'functions for the primary generator action class',
                    action='store_true')
@@ -67,12 +67,12 @@ args = parser.parse_args(sys.argv[1:last_arg_to_parse])
 remaining_args = sys.argv[last_arg_to_parse+1:]
 
 # dump the detector wrapper template
-if args.dump_detector_wrapper_template:
+if args.dump_detector_wrapper:
     print(generate_library.get_dummy_t4g4_detector_wrapper_functions())
     sys.exit(0)
 
 # dump the wrapper template
-if args.dump_pga_wrapper_template:
+if args.dump_pga_wrapper:
     print(generate_library.get_dummy_t4g4_pga_wrapper_functions())
     sys.exit(0)
 
