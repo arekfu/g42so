@@ -10,8 +10,8 @@ import sys
 import tempfile
 
 
-def get_t4g4_detector_wrapper_functions(d_wh, params=''):
-    return get_t4g4_wrapper_functions(
+def get_g42so_detector_wrapper_functions(d_wh, params=''):
+    return get_g42so_wrapper_functions(
         d_wh,
         template_basename='detector_wrapper.cc.in',
         varname='aDetector',
@@ -19,8 +19,8 @@ def get_t4g4_detector_wrapper_functions(d_wh, params=''):
     )
 
 
-def get_t4g4_pga_wrapper_functions(pga_wh, params=''):
-    return get_t4g4_wrapper_functions(
+def get_g42so_pga_wrapper_functions(pga_wh, params=''):
+    return get_g42so_wrapper_functions(
         pga_wh,
         template_basename='pga_wrapper.cc.in',
         varname='aPGA',
@@ -28,7 +28,7 @@ def get_t4g4_pga_wrapper_functions(pga_wh, params=''):
         )
 
 
-def get_t4g4_wrapper_functions(wh, template_basename, varname='a_var',
+def get_g42so_wrapper_functions(wh, template_basename, varname='a_var',
                                params='/* parameters go here */'):
 
     current_module = sys.modules[__name__]
@@ -51,14 +51,14 @@ def get_t4g4_wrapper_functions(wh, template_basename, varname='a_var',
     return wrapper
 
 
-def get_dummy_t4g4_detector_wrapper_functions():
-    return get_t4g4_detector_wrapper_functions(
+def get_dummy_g42so_detector_wrapper_functions():
+    return get_g42so_detector_wrapper_functions(
         ('MyDetectorConstruction', 'MyDetectorConstruction.hh')
         )
 
 
-def get_dummy_t4g4_pga_wrapper_functions():
-    return get_t4g4_pga_wrapper_functions(
+def get_dummy_g42so_pga_wrapper_functions():
+    return get_g42so_pga_wrapper_functions(
         ('MyPrimaryGeneratorAction', 'MyPrimaryGeneratorAction.hh')
         )
 
@@ -110,14 +110,14 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
     output_flags = ['-o', output]
 
     if not custom_detector_wrapper:
-        detector_wrapper = get_t4g4_detector_wrapper_functions(d_wh)
+        detector_wrapper = get_g42so_detector_wrapper_functions(d_wh)
         detector_wrapper_file_name = write_temp_wrapper_file(detector_wrapper)
         sources = [detector_wrapper_file_name] + sources
     else:
         detector_wrapper_file_name = None
 
     if pga_wh and not custom_pga_wrapper:
-        pga_wrapper = get_t4g4_pga_wrapper_functions(pga_wh)
+        pga_wrapper = get_g42so_pga_wrapper_functions(pga_wh)
         pga_wrapper_file_name = write_temp_wrapper_file(pga_wrapper)
         sources = [pga_wrapper_file_name] + sources
     else:

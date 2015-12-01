@@ -5,13 +5,9 @@
  * detector-construction factories. Just make sure you expose the required
  * createG4Geometry and deleteG4Geometry functions.
  *
- * Note that the Geant4 kernel is NOT available here, e.g. there is no
- * RunManager around at the moment these functions are called. This might
- * change in the future.
- *
- * Once you have modified this file, save it and pass it to t4g4 as a source
+ * Once you have modified this file, save it and pass it to g42so as a source
  * file. Make sure you add the --custom-detector-wrapper CLI option, so that
- * t4g4 does not include its standard wrapper.
+ * g42so does not include its standard wrapper.
  */
 
 #include "G4VUserDetectorConstruction.hh"

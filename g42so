@@ -68,12 +68,12 @@ remaining_args = sys.argv[last_arg_to_parse+1:]
 
 # dump the detector wrapper template
 if args.dump_detector_wrapper:
-    print(generate_library.get_dummy_t4g4_detector_wrapper_functions())
+    print(generate_library.get_dummy_g42so_detector_wrapper_functions())
     sys.exit(0)
 
 # dump the wrapper template
 if args.dump_pga_wrapper:
-    print(generate_library.get_dummy_t4g4_pga_wrapper_functions())
+    print(generate_library.get_dummy_g42so_pga_wrapper_functions())
     sys.exit(0)
 
 # check for the presence of source files
