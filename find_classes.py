@@ -23,7 +23,7 @@ def find(base, headers, inheritance='public', many=True,
         found_classes = [match.group(1) for match in re.finditer(cregex, text)]
         if found_classes:
             logging.debug(str(len(found_classes)) + ' matches in this file')
-        classes += [(c, header) for c in found_classes]
+        classes += [(c, os.path.realpath(header)) for c in found_classes]
 
     missing = RuntimeError('could not find any '
                            + base
