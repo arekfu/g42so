@@ -123,6 +123,11 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
     else:
         pga_wrapper_file_name = None
 
+    current_module = sys.modules[__name__]
+    module_dir = os.path.dirname(inspect.getfile(current_module))
+    version_source = os.path.join(module_dir, "version.cc")
+    sources.append(version_source)
+
     # the CLI to execute
     compiler_cli = [compiler] + \
         flags + \
