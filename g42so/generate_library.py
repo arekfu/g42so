@@ -1,5 +1,6 @@
 import detect_compiler
 from distutils.spawn import find_executable
+from pkgutil import get_data
 import subprocess
 import shlex
 import logging
@@ -31,11 +32,7 @@ def get_g42so_pga_wrapper_functions(pga_wh, params=''):
 def get_g42so_wrapper_functions(wh, template_basename, varname='a_var',
                                params='/* parameters go here */'):
 
-    current_module = sys.modules[__name__]
-    module_dir = os.path.dirname(inspect.getfile(current_module))
-    template_fname = os.path.join(module_dir, template_basename)
-    with open(template_fname) as template_f:
-        template = template_f.read()
+    template = get_data('g42so', template_basename)
 
     include_directives = ['#include "' + wh[1] + '"']
     includes = '\n'.join(include_directives)
@@ -123,26 +120,26 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
     else:
         pga_wrapper_file_name = None
 
-    current_module = sys.modules[__name__]
-    module_dir = os.path.dirname(inspect.getfile(current_module))
-    version_source = os.path.join(module_dir, "version.cc")
-    sources.append(version_source)
+    version_source = get_data('g42so', 'version.cc')
+    with tempfile.NamedTemporaryFile(suffix='.cc',
+                                     mode='w+') as version_file:
+        sources.append(version_file.name)
 
-    # the CLI to execute
-    compiler_cli = [compiler] + \
-        flags + \
-        include_flags + \
-        sources + \
-        g4flags + \
-        other_flags + \
-        output_flags
+        # the CLI to execute
+        compiler_cli = [compiler] + \
+            flags + \
+            include_flags + \
+            sources + \
+            g4flags + \
+            other_flags + \
+            output_flags
 
-    try:
-        logging.info('Running compilation...')
-        logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
-        subprocess.check_call(compiler_cli)
-    finally:
-        if detector_wrapper_file_name:
-            os.remove(detector_wrapper_file_name)
-        if pga_wrapper_file_name:
-            os.remove(pga_wrapper_file_name)
+        try:
+            logging.info('Running compilation...')
+            logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
+            subprocess.check_call(compiler_cli)
+        finally:
+            if detector_wrapper_file_name:
+                os.remove(detector_wrapper_file_name)
+            if pga_wrapper_file_name:
+                os.remove(pga_wrapper_file_name)

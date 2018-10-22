@@ -1,0 +1,4 @@
+include README.md
+include detector_wrapper.cc.in
+include pga_wrapper.cc.in
+include version.cc

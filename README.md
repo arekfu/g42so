@@ -2,14 +2,14 @@ g42so
 =====
 
 This is `g42so`, a simple Python script that compiles
-[Geant4](http://geant4.cern.ch/) detector-construction and
+[Geant4](https://geant4.web.cern.ch/) detector-construction and
 primary-generator-action classes, wraps them in C-style (unmangled) adapter
 functions and produces a shared library. The library can then be loaded via
 `dlopen` by third-party code, allowing instantiation of a Geant4 detector
 construction or primary generator action even if the name of the specific class
 is not known in advance.
 
-Compilation is delegated to [`g++`](http://gcc.gnu.org/) by default (no, I did
+Compilation is delegated to [`g++`](https://gcc.gnu.org/) by default (no, I did
 not reimplement `gcc` from scratch), but this can be configured.
 
 Running `./g42so -h` gives a list of available options. You will typically want

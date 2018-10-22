@@ -3,3 +3,6 @@
 *.window
 .*.swp
 .*.swo
+*.egg-info
+build
+dist
