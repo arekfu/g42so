@@ -6,7 +6,6 @@ from setuptools import setup, find_packages
 name = 'g42so'
 author = u'Davide Mancusi'
 author_email = u'davide.mancusi@cea.fr'
-version = '0.1'
 
 with open('README.md') as readme:
     long_description = readme.read()
@@ -14,7 +13,6 @@ with open('README.md') as readme:
 setup(name=name,
       author=author,
       author_email=author_email,
-      version=version,
       description='A tool to convert Geant4 geometries into shared libraries',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -24,6 +22,8 @@ setup(name=name,
                          'pga_wrapper.cc.in',
                          'version.cc']},
       python_requires='>=2.6, <3',
+      use_scm_version=True,
+      setup_requires=['setuptools_scm'],
       classifiers=[
           "Programming Language :: Python :: 2",
           "Development Status :: 4 - Beta",

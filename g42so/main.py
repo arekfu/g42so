@@ -3,9 +3,9 @@
 
 import argparse
 import sys
-import generate_library
 import logging
-import find_classes
+
+from . import generate_library, find_classes, __version__
 
 def main():
     parser = argparse.ArgumentParser(
@@ -18,6 +18,8 @@ def main():
     g_general = parser.add_argument_group('general arguments')
     g_general.add_argument('-v', '--verbose', help='increase verbosity',
                         action='count', default=0)
+    g_general.add_argument('-V', '--version',
+                        action='version', version=__version__)
     g_general.add_argument('-o', '--output', metavar='OUTPUT_FILE',
                         help='name of the file to generate')
     g_general.add_argument('-I', '--include', metavar='INCLUDE_DIR',
