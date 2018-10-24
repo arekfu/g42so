@@ -84,7 +84,7 @@ def main():
         parser.error('too few arguments')
 
     # define the logger
-    logging.basicConfig(level=logging.WARNING - 10*args.verbose)
+    logging.basicConfig(level=logging.INFO - 10*args.verbose)
 
     # process the options
     header_suffixes = ['.hh', '.hpp', '.h', '.hxx']

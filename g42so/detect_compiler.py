@@ -3,8 +3,8 @@ import os
 import logging
 
 FLAGS_DICTIONARY = {
-    'g++': ['-O2', '-g', '-fPIC', '-shared'],
-    'clang++': ['-O2', '-g', '-fPIC', '-shared'],
+    'g++': ['-O2', '-g', '-fPIC', '-shared', '-Wl,-z,defs'],
+    'clang++': ['-O2', '-g', '-fPIC', '-shared', '-Wl,-z,defs'],
     }
 
 

@@ -144,6 +144,13 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
             logging.info('Running compilation...')
             logging.debug(' ... compiler CLI: ' + ' '.join(compiler_cli))
             subprocess.check_call(compiler_cli)
+        except subprocess.CalledProcessError as err:
+            logging.error('Compilation failed with return code {}'
+                          .format(err.returncode))
+            logging.error('Please inspect the compiler error messages above '
+                          'for clues. Maybe you forgot to include a relevant '
+                          'source file?')
+            sys.exit(1)
         finally:
             if detector_wrapper_file_name:
                 os.remove(detector_wrapper_file_name)
