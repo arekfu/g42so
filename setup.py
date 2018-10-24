@@ -23,7 +23,7 @@ setup(name=name,
       package_data={'': ['detector_wrapper.cc.in',
                          'pga_wrapper.cc.in',
                          'version.cc']},
-      python_requires='>=2.6, <3',
+      python_requires='>=2.6, <4',
       classifiers=[
           "Programming Language :: Python :: 2",
           "Development Status :: 4 - Beta",

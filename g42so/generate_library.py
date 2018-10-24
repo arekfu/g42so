@@ -1,4 +1,4 @@
-import detect_compiler
+from . import detect_compiler
 from distutils.spawn import find_executable
 from pkgutil import get_data
 import subprocess
@@ -9,6 +9,7 @@ import os
 import os.path
 import sys
 import tempfile
+import locale
 
 
 def get_g42so_detector_wrapper_functions(d_wh, params=''):
@@ -32,7 +33,7 @@ def get_g42so_pga_wrapper_functions(pga_wh, params=''):
 def get_g42so_wrapper_functions(wh, template_basename, varname='a_var',
                                params='/* parameters go here */'):
 
-    template = get_data('g42so', template_basename)
+    template = get_data('g42so', template_basename).decode('utf-8')
 
     include_directives = ['#include "' + wh[1] + '"']
     includes = '\n'.join(include_directives)
@@ -96,7 +97,7 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
                                'line.')
     g4cli = [g4config, '--cflags', '--libs']
     g4process = subprocess.Popen(g4cli, stdout=subprocess.PIPE)
-    g4flags_str = g4process.communicate()[0]
+    g4flags_str = g4process.communicate()[0].decode(locale.getpreferredencoding())
     g4flags = shlex.split(g4flags_str)
 
     # other flags if present

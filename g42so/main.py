@@ -3,9 +3,9 @@
 
 import argparse
 import sys
-import generate_library
+from . import generate_library
 import logging
-import find_classes
+from . import find_classes
 
 def main():
     parser = argparse.ArgumentParser(
@@ -71,12 +71,12 @@ def main():
 
     # dump the detector wrapper template
     if args.dump_detector_wrapper:
-        print(generate_library.get_dummy_g42so_detector_wrapper_functions())
+        print((generate_library.get_dummy_g42so_detector_wrapper_functions()))
         sys.exit(0)
 
     # dump the wrapper template
     if args.dump_pga_wrapper:
-        print(generate_library.get_dummy_g42so_pga_wrapper_functions())
+        print((generate_library.get_dummy_g42so_pga_wrapper_functions()))
         sys.exit(0)
 
     # check for the presence of source files
