@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 name = 'g42so'
 author = u'Davide Mancusi'
 author_email = u'davide.mancusi@cea.fr'
-version = '0.1'
+version = '0.1.0'
 
 with open('README.md') as readme:
     long_description = readme.read()
