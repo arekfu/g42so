@@ -1,4 +1,3 @@
-import detect_compiler
 from distutils.spawn import find_executable
 from pkgutil import get_data
 import subprocess
@@ -10,6 +9,7 @@ import os.path
 import sys
 import tempfile
 
+from . import detect_compiler
 
 def get_g42so_detector_wrapper_functions(d_wh, params=''):
     return get_g42so_wrapper_functions(
