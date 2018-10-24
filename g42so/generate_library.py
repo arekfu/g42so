@@ -76,8 +76,14 @@ def write_temp_wrapper_file(wrapper):
 
 def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
             g4config_path=None, custom_detector_wrapper=None,
-            custom_pga_wrapper=None):
-    compiler, flags = detect_compiler.compiler_and_flags()
+            custom_pga_wrapper=None, compiler=None):
+    if compiler is None:
+        compiler, flags = detect_compiler.compiler_and_flags()
+    else:
+        flags = detect_compiler.flags(compiler)
+
+    if compiler is None or not flags:
+        raise RuntimeError('cannot find compiler or compilation flags')
 
     # determine the Geant4-specific compilation flags
     if g4config_path:
