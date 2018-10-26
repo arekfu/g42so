@@ -1,6 +1,8 @@
 g42so
 =====
 
+[![PyPI version](https://badge.fury.io/py/g42so.svg)](https://badge.fury.io/py/g42so)
+
 This is `g42so`, a simple Python script that compiles
 [Geant4](https://geant4.web.cern.ch/) detector-construction and
 primary-generator-action classes, wraps them in C-style (unmangled) adapter
