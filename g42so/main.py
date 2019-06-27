@@ -28,6 +28,9 @@ def main():
                         action='append', default=[])
     g_general.add_argument('-c', '--compiler', metavar='COMPILER_PATH',
                         help='path to the compiler that should be used')
+    g_general.add_argument('-e', '--encoding', metavar='ENCODING',
+                        help='character encoding for geant4-config output',
+                        default='utf-8')
     g_general.add_argument('--geant4-config',
                         help='path to the geant4-config executable')
     g_general.add_argument('sources', metavar='source_file', nargs='*',
@@ -146,7 +149,8 @@ def main():
         g4config_path=args.geant4_config,
         custom_detector_wrapper=args.custom_detector_wrapper,
         custom_pga_wrapper=args.custom_pga_wrapper,
-        compiler=args.compiler
+        compiler=args.compiler,
+        encoding=args.encoding
         )
 
 if __name__ == '__main__':

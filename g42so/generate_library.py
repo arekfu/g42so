@@ -32,7 +32,7 @@ def get_g42so_pga_wrapper_functions(pga_wh, params=''):
 def get_g42so_wrapper_functions(wh, template_basename, varname='a_var',
                                params='/* parameters go here */'):
 
-    template = get_data('g42so', template_basename)
+    template = get_data('g42so', template_basename).decode('utf-8')
 
     include_directives = ['#include "' + wh[1] + '"']
     includes = '\n'.join(include_directives)
@@ -76,7 +76,7 @@ def write_temp_wrapper_file(wrapper):
 
 def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
             g4config_path=None, custom_detector_wrapper=None,
-            custom_pga_wrapper=None, compiler=None):
+            custom_pga_wrapper=None, compiler=None, encoding='utf-8'):
     if compiler is None:
         compiler, flags = detect_compiler.compiler_and_flags()
     else:
@@ -96,7 +96,7 @@ def compile(sources, includes, d_wh, pga_wh, output=None, other_flags=None,
                                'line.')
     g4cli = [g4config, '--cflags', '--libs']
     g4process = subprocess.Popen(g4cli, stdout=subprocess.PIPE)
-    g4flags_str = g4process.communicate()[0]
+    g4flags_str = g4process.communicate()[0].decode(encoding)
     g4flags = shlex.split(g4flags_str)
 
     # other flags if present
