@@ -51,6 +51,9 @@ def main():
 
     # pga args
     g_pga = parser.add_argument_group('primary-generator-action arguments')
+    g_pga.add_argument('--without-pga', action='store_true',
+                    help='do not compile the primary generator action',
+                    default=False)
     g_pga.add_argument('-p', '--primary-generator-action', metavar='PGA_CLASS',
                     help='name of the primary-generator-action class')
     g_pga.add_argument('--dump-pga-wrapper',
@@ -112,23 +115,26 @@ def main():
             )
 
     # process the -p option, if supplied
-    if args.primary_generator_action:
-        pga = args.primary_generator_action
-        pga_wheader = (
-            pga,
-            find_classes.find_header_for_class(
+    if not args.without_pga:
+        if args.primary_generator_action:
+            pga = args.primary_generator_action
+            pga_wheader = (
                 pga,
-                dirs=args.include,
-                suffixes=header_suffixes
+                find_classes.find_header_for_class(
+                    pga,
+                    dirs=args.include,
+                    suffixes=header_suffixes
+                    )
                 )
-            )
+        else:
+            pga_wheader = find_classes.find_in_dirs(
+                base='G4VUserPrimaryGeneratorAction',
+                dirs=args.include,
+                suffixes=header_suffixes,
+                many=False,
+                required=False)
     else:
-        pga_wheader = find_classes.find_in_dirs(
-            base='G4VUserPrimaryGeneratorAction',
-            dirs=args.include,
-            suffixes=header_suffixes,
-            many=False,
-            required=False)
+        pga_wheader = ()
 
     generate_library.compile(
         args.sources,
